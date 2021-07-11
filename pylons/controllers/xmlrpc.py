@@ -2,7 +2,8 @@
 import inspect
 import logging
 import types
-import xmlrpclib
+#import xmlrpclib
+from xmlrpc import client
 
 from paste.response import replace_header
 
@@ -15,7 +16,7 @@ log = logging.getLogger(__name__)
 
 XMLRPC_MAPPING = ((basestring, 'string'), (list, 'array'), (bool, 'boolean'),
                   (int, 'int'), (float, 'double'), (dict, 'struct'),
-                  (xmlrpclib.DateTime, 'dateTime.iso8601'),
+                  (xmlrpclib.from xmlrpc import client, 'dateTime.iso8601'),
                   (xmlrpclib.Binary, 'base64'))
 
 
@@ -27,7 +28,6 @@ def xmlrpc_sig(args):
         for type, xml_name in XMLRPC_MAPPING:
             if isinstance(param, type):
                 signature.append(xml_name)
-                break
     return signature
 
 
