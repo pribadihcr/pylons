@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 XMLRPC_MAPPING = ((basestring, 'string'), (list, 'array'), (bool, 'boolean'),
                   (int, 'int'), (float, 'double'), (dict, 'struct'),
-                  (from xmlrpc import client, 'dateTime.iso8601'),
+                  #(from xmlrpc import client, 'dateTime.iso8601'),
                   (client.Binary, 'base64'))
 
 
