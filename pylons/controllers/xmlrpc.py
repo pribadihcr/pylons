@@ -2,7 +2,7 @@
 import inspect
 import logging
 import types
-#import xmlrpclib
+#import client
 from xmlrpc import client
 
 from paste.response import replace_header
@@ -16,13 +16,13 @@ log = logging.getLogger(__name__)
 
 XMLRPC_MAPPING = ((basestring, 'string'), (list, 'array'), (bool, 'boolean'),
                   (int, 'int'), (float, 'double'), (dict, 'struct'),
-                  (xmlrpclib.from xmlrpc import client, 'dateTime.iso8601'),
-                  (xmlrpclib.Binary, 'base64'))
+                  (from xmlrpc import client, 'dateTime.iso8601'),
+                  (client.Binary, 'base64'))
 
 
 def xmlrpc_sig(args):
     """Returns a list of the function signature in string format based on a
-    tuple provided by xmlrpclib."""
+    tuple provided by client."""
     signature = []
     for param in args:
         for type, xml_name in XMLRPC_MAPPING:
@@ -33,8 +33,8 @@ def xmlrpc_sig(args):
 
 def xmlrpc_fault(code, message):
     """Convienence method to return a Pylons response XMLRPC Fault"""
-    fault = xmlrpclib.Fault(code, message)
-    return Response(body=xmlrpclib.dumps(fault, methodresponse=True))
+    fault = client.Fault(code, message)
+    return Response(body=client.dumps(fault, methodresponse=True))
 
 
 class XMLRPCController(WSGIController):
@@ -88,10 +88,10 @@ class XMLRPCController(WSGIController):
         'int' - int
         'double' - float
         'struct' - dict
-        'dateTime.iso8601' - xmlrpclib.DateTime
-        'base64' - xmlrpclib.Binary
+        'dateTime.iso8601' - client.DateTime
+        'base64' - client.Binary
 
-    The class variable ``allow_none`` is passed to xmlrpclib.dumps;
+    The class variable ``allow_none`` is passed to client.dumps;
     enabling it allows translating ``None`` to XML (an extension to the
     XML-RPC specification)
 
@@ -128,7 +128,7 @@ class XMLRPCController(WSGIController):
             abort(413, "XML body too large")
 
         body = environ['wsgi.input'].read(int(environ['CONTENT_LENGTH']))
-        rpc_args, orig_method = xmlrpclib.loads(body)
+        rpc_args, orig_method = client.loads(body)
 
         method = self._find_method_name(orig_method)
         func = self._find_method(method)
@@ -193,10 +193,10 @@ class XMLRPCController(WSGIController):
     def _dispatch_call(self):
         """Dispatch the call to the function chosen by __call__"""
         raw_response = self._inspect_call(self._func)
-        if not isinstance(raw_response, xmlrpclib.Fault):
+        if not isinstance(raw_response, client.Fault):
             raw_response = (raw_response,)
 
-        response = xmlrpclib.dumps(raw_response, methodresponse=True,
+        response = client.dumps(raw_response, methodresponse=True,
                                    allow_none=self.allow_none)
         return response
 
@@ -261,7 +261,7 @@ class XMLRPCController(WSGIController):
         if method:
             return getattr(method, 'signature', '')
         else:
-            return xmlrpclib.Fault(0, 'No such method name')
+            return client.Fault(0, 'No such method name')
     system_methodSignature.signature = [['array', 'string'],
                                         ['string', 'string']]
 
@@ -274,7 +274,7 @@ class XMLRPCController(WSGIController):
             if sig:
                 help += "\n\nMethod signature: %s" % sig
             return help
-        return xmlrpclib.Fault(0, "No such method name")
+        return client.Fault(0, "No such method name")
     system_methodHelp.signature = [['string', 'string']]
 
 
